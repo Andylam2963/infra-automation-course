@@ -3,3 +3,4 @@
 .terraform*
 *.pub
 *.pem
+nginx.conf

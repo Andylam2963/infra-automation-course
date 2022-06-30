@@ -1,0 +1,64 @@
+- name: Workshop 2
+  hosts: all
+  tasks:
+    - name: Install Nginx
+      apt:
+        name: "{{ item }}"
+        state: present
+      loop:
+      - nginx
+
+    - name: Generate file for Nginx
+      template:
+        src: ./code-server.conf.j2
+        dest: /etc/nginx/sites-available/code-server.conf
+
+    - name: Generate file for System service
+      template:
+        src: ./code-server.service.j2
+        dest: /lib/systemd/system/code-server.service
+
+    - name: Create directory for code-server
+      file:
+        path: ~/code-server
+        state: directory
+
+    - name: install code-server
+      shell: |
+        wget https://github.com/coder/code-server/releases/download/v4.4.0/code-server-4.4.0-linux-amd64.tar.gz
+        tar -xzvf code-server-4.4.0-linux-amd64.tar.gz
+        cp -r code-server-4.4.0-linux-amd64 /usr/lib/code-server
+      args:
+        chdir: code-server/
+
+    - name: create symbolic link
+      file:
+        src: /usr/lib/code-server/bin/code-server
+        dest: /usr/bin/code-server
+        state: link
+
+    - name: Create code-server directory in /var/lib
+      file:
+        path: /var/lib/code-server
+        state: directory
+      notify: Reload code-server
+
+    - name: Create link for nginx conf
+      file:
+        src: /etc/nginx/sites-available/code-server.conf
+        dest: /etc/nginx/sites-enabled/code-server.conf
+        state: link
+      notify: Reload Nginx
+
+  handlers:
+    - name: Reload Nginx
+      service:
+        name: nginx
+        state: reloaded
+        daemon_reload: yes
+
+    - name: Reload code-server
+      service:
+        name: code-server
+        state: reloaded
+        daemon_reload: yes

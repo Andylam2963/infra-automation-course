@@ -1,0 +1,8 @@
+- name: Basic server test
+  hosts: all
+  tasks:
+    - name: Check server connectivity
+      ping:
+    - name: Print server ip address
+      debug:
+        msg: "HELLOOOO, ip address is {{ ansible_host }}"

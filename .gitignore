@@ -4,3 +4,4 @@
 *.pub
 *.pem
 nginx.conf
+*.pkrvars.hcl

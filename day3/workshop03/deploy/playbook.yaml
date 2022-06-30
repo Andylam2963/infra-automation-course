@@ -1,0 +1,31 @@
+- name: Workshop 3 part 2 stage 2
+  hosts: all
+  tasks:
+    - name: Generate file for Nginx
+      template:
+        src: ./code-server.conf.j2
+        dest: /etc/nginx/sites-available/code-server.conf
+
+    - name: Generate file for System service
+      template:
+        src: ./code-server.service.j2
+        dest: /lib/systemd/system/code-server.service
+
+    - name: Create link for nginx conf
+      file:
+        src: /etc/nginx/sites-available/code-server.conf
+        dest: /etc/nginx/sites-enabled/code-server.conf
+        state: link
+
+    - name: Reload Nginx
+      service:
+        name: nginx
+        state: reloaded
+        daemon_reload: yes
+
+    - name: Start code-server
+      systemd:
+        name: code-server
+        state: started
+        enabled: yes
+        daemon_reload: yes
